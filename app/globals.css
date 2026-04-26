@@ -13,14 +13,106 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --bg: #f0fdf4;
+  --card: rgba(255,255,255,0.3);
+  --text: #064e3b;
+}
+
+.dark {
+  --bg: #052e16;
+  --card: rgba(0,0,0,0.4);
+  --text: #d1fae5;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: all 0.3s ease;
 }
+}
+
+/* page entering action */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+
+.input {
+  @apply w-full p-3 border rounded-lg transition-all duration-200 outline-none;
+}
+
+
+.input-default {
+  @apply border-gray-300 bg-white;
+}
+
+/* focus state */
+.input-focus {
+  @apply focus:border-blue-500 focus:ring-2 focus:ring-blue-200;
+}
+
+/* error state */
+.input-error {
+  @apply border-red-500 bg-red-50;
+}
+
+/* button */
+.btn {
+  @apply w-full py-3 rounded-lg font-semibold transition-all duration-200 shadow;
+}
+
+.btn-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700 active:scale-95;
+}
+
+.btn-danger {
+  @apply bg-red-600 text-white hover:bg-red-700 active:scale-95;
+}
+
+.btn-disabled {
+  @apply bg-gray-400 cursor-not-allowed;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  animation: fadeInUp 0.4s ease;
+}
+
+.toast-success {
+  background-color: #16a34a;
+}
+
+.toast-error {
+  background-color: #dc2626;
+}
+
