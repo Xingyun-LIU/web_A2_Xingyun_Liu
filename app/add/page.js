@@ -65,7 +65,7 @@ export default function Add() {
     }
   };
 
-  // ── Success screen ──────────────────────────────────────────────────────────
+  // Success screen
   if (successMessage) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-green-200">
