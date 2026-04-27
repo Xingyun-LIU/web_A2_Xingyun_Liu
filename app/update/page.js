@@ -11,7 +11,7 @@ export default function Update() {
   const [searching, setSearching] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  {/*step 1: search by serial number to load existing data */}
+  {/* Step 1: Search by serial number and load form */}
   const handleSearch = async () => {
     const trimmed = serial.trim();
     if (!trimmed) {
@@ -22,18 +22,19 @@ export default function Update() {
     setSearching(true);
     setLoadError("");
     setForm(null);
-   {/*connect to API */}
+
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(trimmed)}`);
       const data = await res.json();
 
       if (res.ok && data.success && data.data.length > 0) {
-        {/* Try to find an exact match for the serial number among the results */}
+        // Find exact serial match from results
         const match = data.data.find(
           (item) => item.SerialNumber === trimmed
         );
         if (match) {
           setForm({
+            // Read-only identifiers (displayed but not editable)
             ApplianceID:  match.ApplianceID,
             SerialNumber: match.SerialNumber,
             // Editable appliance fields
@@ -50,18 +51,16 @@ export default function Update() {
             Mobile:    match.Mobile    || "",
             Address:   match.Address   || "",
             Eircode:   match.Eircode   || "",
-            UserID:    match.UserID    || "", 
           });
-          {/*eeror*/}
         } else {
-          setLoadError("No appliance found.");
+          setLoadError("No appliance found with that exact serial number.");
         }
       } else {
         setLoadError("No matching appliance found!");
       }
     } catch (err) {
       console.error("Load error:", err);
-      setLoadError("Please try again.");
+      setLoadError("A network error occurred. Please try again.");
     } finally {
       setSearching(false);
     }
@@ -78,12 +77,12 @@ export default function Update() {
     setGlobalError("");
   };
 
-  {/*step 2: update the appliance with new data */}
+  {/* Step 2: Submit updated form data */}
   const handleUpdate = async () => {
     setLoading(true);
     setFieldErrors({});
     setGlobalError("");
-   {/* Call the backend API to perform the update */}
+
     try {
       const res = await fetch("/api/update", {
         method: "PUT",
@@ -98,17 +97,17 @@ export default function Update() {
       } else if (data.errors) {
         setFieldErrors(data.errors);
       } else {
-        setGlobalError(data.message || "Update failed.");
+        setGlobalError(data.message || "Update failed. Please try again.");
       }
     } catch (err) {
       console.error("Update error:", err);
-      setGlobalError(" Please try again.");
+      setGlobalError("A network error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  {/*step 3: show success message */}
+  {/* Success state (after update) */}
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-green-200">
@@ -131,43 +130,41 @@ export default function Update() {
     );
   }
 
-  {/* Main form UI */}
+  {/* Main UI */}
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-green-200 py-10">
       <div className="backdrop-blur-xl bg-white/30 border border-white/40 p-8 rounded-2xl shadow-xl w-full max-w-md space-y-4 animate-[fadeInUp_0.6s_ease-out]">
 
         <h1 className="text-2xl font-bold text-center">Update Appliance</h1>
 
-        {/* Step 1: Serial number lookup */}
+        {/* ── Step 1: Serial number lookup ── */}
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 pt-1">
           Step 1 — Find Appliance
         </p>
 
-        <div className="flex gap-2">
-          <input
-            className="input input-default input-focus flex-1"
-            placeholder="Serial Number (e.g. 1234-5678-9012)"
-            value={serial}
-            onChange={(e) => {
-              setSerial(e.target.value);
-              setLoadError("");
-            }}
-            onKeyDown={handleKeyDown}
-          />
-          <button
-            className={`btn btn-primary px-4 ${searching ? "btn-disabled opacity-60 cursor-not-allowed" : ""}`}
-            onClick={handleSearch}
-            disabled={searching}
-          >
-            {searching ? "..." : "Load"}
-          </button>
-        </div>
+        <input
+          className="input input-default input-focus w-full"
+          placeholder="Serial Number (e.g. 1234-5678-9012)"
+          value={serial}
+          onChange={(e) => {
+            setSerial(e.target.value);
+            setLoadError("");
+          }}
+          onKeyDown={handleKeyDown}
+        />
+        <button
+          className={`btn btn-primary w-full ${searching ? "btn-disabled opacity-60 cursor-not-allowed" : ""}`}
+          onClick={handleSearch}
+          disabled={searching}
+        >
+          {searching ? "Searching..." : "Load Appliance"}
+        </button>
 
         {loadError && (
           <p className="text-xs text-red-600 font-medium">{loadError}</p>
         )}
 
-        {/* Step 2: Edit form (shown after load) */}
+        {/* ── Step 2: Edit form (shown after load) ── */}
         {form && (
           <>
             {/* Read-only identifiers */}
@@ -196,51 +193,33 @@ export default function Update() {
             </p>
 
             <Field label="Appliance Type" error={fieldErrors.ApplianceType}>
-              <input 
-              name="ApplianceType" 
-              className={inputClass(fieldErrors.ApplianceType)}
-              value={form.ApplianceType} 
-              onChange={handleChange} />
+              <input name="ApplianceType" className={inputClass(fieldErrors.ApplianceType)}
+                value={form.ApplianceType} onChange={handleChange} />
             </Field>
 
             <Field label="Brand" error={fieldErrors.Brand}>
-              <input 
-              name="Brand" 
-              className={inputClass(fieldErrors.Brand)}
-              value={form.Brand} 
-              onChange={handleChange} />
+              <input name="Brand" className={inputClass(fieldErrors.Brand)}
+                value={form.Brand} onChange={handleChange} />
             </Field>
 
             <Field label="Model Number" error={fieldErrors.ModelNumber} hint="Format: 000-000-0000">
-              <input 
-              name="ModelNumber" 
-              className={inputClass(fieldErrors.ModelNumber)}
-              value={form.ModelNumber} 
-              onChange={handleChange} />
+              <input name="ModelNumber" className={inputClass(fieldErrors.ModelNumber)}
+                value={form.ModelNumber} onChange={handleChange} />
             </Field>
 
             <Field label="Purchase Date" error={fieldErrors.PurchaseDate}>
-              <input 
-              name="PurchaseDate" 
-              type="date" 
-              className={inputClass(fieldErrors.PurchaseDate)}
-              value={form.PurchaseDate} onChange={handleChange} />
+              <input name="PurchaseDate" type="date" className={inputClass(fieldErrors.PurchaseDate)}
+                value={form.PurchaseDate} onChange={handleChange} />
             </Field>
 
             <Field label="Warranty Expiry Date" error={fieldErrors.WarrantyDate}>
-              <input 
-              name="WarrantyDate" 
-              type="date" 
-              className={inputClass(fieldErrors.WarrantyDate)}
-              value={form.WarrantyDate} onChange={handleChange} />
+              <input name="WarrantyDate" type="date" className={inputClass(fieldErrors.WarrantyDate)}
+                value={form.WarrantyDate} onChange={handleChange} />
             </Field>
 
             <Field label="Cost of Appliance (€)" error={fieldErrors.CostOfAppliance}>
-              <input 
-              name="CostOfAppliance" 
-              className={inputClass(fieldErrors.CostOfAppliance)}
-              value={form.CostOfAppliance} 
-              onChange={handleChange} />
+              <input name="CostOfAppliance" className={inputClass(fieldErrors.CostOfAppliance)}
+                value={form.CostOfAppliance} onChange={handleChange} />
             </Field>
 
             {/* User fields */}
@@ -249,52 +228,33 @@ export default function Update() {
             </p>
 
             <Field label="First Name" error={fieldErrors.FirstName}>
-              <input 
-              name="FirstName" 
-              className={inputClass(fieldErrors.FirstName)}
-              value={form.FirstName} 
-              onChange={handleChange} />
+              <input name="FirstName" className={inputClass(fieldErrors.FirstName)}
+                value={form.FirstName} onChange={handleChange} />
             </Field>
 
             <Field label="Last Name" error={fieldErrors.LastName}>
-              <input 
-              name="LastName" 
-              className={inputClass(fieldErrors.LastName)}
-              value={form.LastName} 
-              onChange={handleChange} />
+              <input name="LastName" className={inputClass(fieldErrors.LastName)}
+                value={form.LastName} onChange={handleChange} />
             </Field>
 
             <Field label="Email" error={fieldErrors.Email}>
-              <input 
-              name="Email" 
-              type="email" 
-              className={inputClass(fieldErrors.Email)}
-              value={form.Email} 
-              onChange={handleChange} />
+              <input name="Email" type="email" className={inputClass(fieldErrors.Email)}
+                value={form.Email} onChange={handleChange} />
             </Field>
 
             <Field label="Mobile" error={fieldErrors.Mobile}>
-              <input 
-              name="Mobile" 
-              className={inputClass(fieldErrors.Mobile)}
-              value={form.Mobile} 
-              onChange={handleChange} />
+              <input name="Mobile" className={inputClass(fieldErrors.Mobile)}
+                value={form.Mobile} onChange={handleChange} />
             </Field>
 
             <Field label="Address" error={fieldErrors.Address}>
-              <input 
-              name="Address" 
-              className={inputClass(fieldErrors.Address)}
-              value={form.Address} 
-              onChange={handleChange} />
+              <input name="Address" className={inputClass(fieldErrors.Address)}
+                value={form.Address} onChange={handleChange} />
             </Field>
 
             <Field label="Eircode" error={fieldErrors.Eircode} hint="Format: D## XXXX">
-              <input 
-              name="Eircode" 
-              className={inputClass(fieldErrors.Eircode)}
-              value={form.Eircode} 
-              onChange={handleChange} />
+              <input name="Eircode" className={inputClass(fieldErrors.Eircode)}
+                value={form.Eircode} onChange={handleChange} />
             </Field>
 
             <button
