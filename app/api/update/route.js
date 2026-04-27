@@ -7,7 +7,7 @@ export async function PUT(req) {
     `UPDATE Appliance SET 
      Brand=?, 
      ModelNumber=?, 
-     WarrantyExpiration=?, 
+     WarrantyDate=?, 
      Cost=?
      WHERE SerialNumber=?`,
     [
